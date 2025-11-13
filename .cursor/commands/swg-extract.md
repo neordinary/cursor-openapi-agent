@@ -35,7 +35,7 @@
 - 추출된 엔드포인트 수, 컨트롤러 수, DTO 클래스 수, HTTP 메소드별 분포 등 통계 정보 출력
 - **DTO 정보 포함**: 파일명 패턴으로 감지된 DTO 클래스와 필드 정보
 - **연관 DTO 자동 감지**: 컨트롤러에서 사용되는 `@RequestBody`, 반환 타입의 DTO 클래스
-- **필수: 파일 링크 제공**: 분석된 모든 파일에 대해 반드시 `file://절대경로` 형식의 클릭 가능한 링크를 제공해야 합니다. 절대 빼먹지 마세요!
+- **필수: 파일 링크 제공**: 추출된 엔드포인트, DTO 클래스, 메타데이터 파일을 설명할 때 반드시 `[파일명](file://절대경로)` 형식의 클릭 가능한 링크를 바로 포함해야 합니다. 절대 빼먹지 마세요!
 - 이 파일은 다음 단계인 `/swg-apply` 명령어에서 사용됩니다
 
 ## 다음 단계
@@ -49,32 +49,28 @@
 - **전체 스캔**: `run_extract.sh` (기본 동작)
 - **선택적 스캔**: `run_extract.sh --files 파일경로1 파일경로2 ...` (선택된 파일들만 처리)
 
-## 📁 분석된 파일 링크 (⚠️ 필수)
+## 결과 출력 형식
 
-**⚠️ 반드시 제공해야 할 파일 링크:**
+**⚠️ 필수: 파일 링크는 결과 설명에 바로 포함**
 
-실행 결과에서 다음 정보를 **반드시** 제공해야 합니다. 파일 링크를 빼먹으면 안 됩니다!
-
-1. **분석된 컨트롤러 파일들**: 각 컨트롤러 파일에 대해 `[파일명](file://절대경로)` 형식의 클릭 가능한 링크 제공
-2. **분석된 DTO 파일들**: 각 DTO 파일에 대해 `[파일명](file://절대경로)` 형식의 클릭 가능한 링크 제공
-3. **생성된 메타데이터 파일**: `[endpoints.json](file://절대경로/cursor-openapi-agent/out/endpoints.json)` 링크 제공
+결과를 출력할 때 별도의 "분석된 파일 링크" 섹션을 만들지 말고, 추출된 엔드포인트, DTO 클래스, 메타데이터 파일을 설명하는 본문에 바로 링크를 포함하세요.
 
 **출력 예시:**
 ```
-## 📁 분석된 파일 링크
+## 📊 추출 결과
 
-### 컨트롤러 파일
-- [UserController.java](file:///Users/dia/repositories/cursor-openapi-agent/src/main/java/.../UserController.java)
-- [TravelController.java](file:///Users/dia/repositories/cursor-openapi-agent/src/main/java/.../TravelController.java)
+### 추출된 컨트롤러
+- [UserController.java](file:///Users/dia/repositories/cursor-openapi-agent/src/main/java/.../UserController.java): 5개의 엔드포인트 추출
+- [TravelController.java](file:///Users/dia/repositories/cursor-openapi-agent/src/main/java/.../TravelController.java): 3개의 엔드포인트 추출
 
-### DTO 파일
-- [UserDto.java](file:///Users/dia/repositories/cursor-openapi-agent/src/main/java/.../UserDto.java)
-- [TravelRequest.java](file:///Users/dia/repositories/cursor-openapi-agent/src/main/java/.../TravelRequest.java)
+### 추출된 DTO 클래스
+- [UserDto.java](file:///Users/dia/repositories/cursor-openapi-agent/src/main/java/.../UserDto.java): 8개 필드
+- [TravelRequest.java](file:///Users/dia/repositories/cursor-openapi-agent/src/main/java/.../TravelRequest.java): 5개 필드
 
 ### 메타데이터 파일
-- [endpoints.json](file:///Users/dia/repositories/cursor-openapi-agent/out/endpoints.json)
+메타데이터가 [endpoints.json](file:///Users/dia/repositories/cursor-openapi-agent/out/endpoints.json)에 저장되었습니다.
 ```
 
-**중요**: 파일을 분석하거나 찾았으면 반드시 해당 파일에 대한 클릭 가능한 링크를 제공하세요. 링크 없이 파일명만 나열하는 것은 허용되지 않습니다.
+**중요**: 파일을 언급할 때마다 반드시 클릭 가능한 링크를 바로 포함하세요. 링크 없이 파일명만 나열하는 것은 허용되지 않습니다.
 
 실제 스크립트는 `cursor-openapi-agent/scripts/run_extract.sh`에서 확인할 수 있습니다.
