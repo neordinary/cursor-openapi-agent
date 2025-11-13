@@ -92,10 +92,10 @@ public class ControllerExtractor {
 
             // 파일명으로 DTO 클래스인지 확인
             if (isDtoFile(filePath)) {
-                cu.accept(new DtoVisitor(filePath, dtoClasses), null);
+                cu.accept(new DtoVisitor(filePath, dtoClasses, projectRoot, javaParser), null);
             } else {
                 // AST를 순회하며 Controller 정보 추출
-                cu.accept(new ControllerVisitor(controllers, dtoClasses, projectRoot), null);
+                cu.accept(new ControllerVisitor(controllers, dtoClasses, projectRoot, javaParser), null);
             }
         } catch (Exception e) {
             System.err.println("Error processing file: " + filePath + " - " + e.getMessage());
@@ -118,10 +118,10 @@ public class ControllerExtractor {
             
             // 파일명으로 DTO 클래스인지 확인
             if (isDto) {
-                cu.accept(new DtoVisitor(filePath, dtoClasses), null);
+                cu.accept(new DtoVisitor(filePath, dtoClasses, projectRoot, javaParser), null);
             } else {
                 // AST를 순회하며 Controller 정보 추출
-                cu.accept(new ControllerVisitor(controllers, dtoClasses, projectRoot), null);
+                cu.accept(new ControllerVisitor(controllers, dtoClasses, projectRoot, javaParser), null);
                 isController = true; // 컨트롤러 파일로 처리됨
             }
             

@@ -1,5 +1,7 @@
 package io.swaggeragent.extractor;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -23,6 +25,7 @@ public class ControllerVisitor extends VoidVisitorAdapter<Void> {
     private final List<ControllerInfo> controllers;
     private final Set<DtoInfo> dtoClasses;
     private final String projectRoot;
+    private final JavaParser javaParser;
 
     @Override
     public void visit(ClassOrInterfaceDeclaration n, Void arg) {
@@ -329,7 +332,7 @@ public class ControllerVisitor extends VoidVisitorAdapter<Void> {
     }
 
     /**
-     * DTO 클래스가 이미 존재하지 않으면 추가
+     * DTO 클래스가 이미 존재하지 않으면 추가하고 재귀적으로 처리
      */
     private void addDtoIfNotExists(String className, MethodDeclaration method) {
         // 이미 존재하는지 확인
@@ -340,21 +343,39 @@ public class ControllerVisitor extends VoidVisitorAdapter<Void> {
             // 파일 경로 찾기
             String filePath = findDtoFileByClassName(className);
             
-            // 파일을 찾지 못한 경우 추정 경로 사용
-            if (filePath == null || !Files.exists(Paths.get(filePath))) {
-                filePath = "src/main/java/com/example/dto/" + className + ".java";
+            if (filePath != null && Files.exists(Paths.get(filePath))) {
+                // DTO 파일을 찾았으면 파싱하여 처리
+                try {
+                    Path path = Paths.get(filePath);
+                    CompilationUnit cu = javaParser.parse(path).getResult().orElse(null);
+                    if (cu != null) {
+                        // 재귀적으로 DTO Visitor를 사용하여 중첩된 DTO도 탐색
+                        cu.accept(new DtoVisitor(path, dtoClasses, projectRoot, javaParser), null);
+                    }
+                } catch (Exception e) {
+                    System.err.println("DTO 파일 처리 중 오류: " + filePath + " - " + e.getMessage());
+                    // 오류 발생 시 빈 DTO 정보만 추가
+                    addEmptyDto(className, filePath);
+                }
+            } else {
+                // 파일을 찾지 못한 경우 빈 DTO 정보만 추가
+                String estimatedPath = "src/main/java/com/example/dto/" + className + ".java";
+                addEmptyDto(className, estimatedPath);
             }
-            
-            // DTO 정보 생성
-            DtoInfo dto = DtoInfo.builder()
-                .className(className)
-                .fields(new ArrayList<>())
-                .existingAnnotations(new HashMap<>())
-                .filePath(filePath)
-                .build();
-            
-            dtoClasses.add(dto);
         }
+    }
+    
+    /**
+     * 빈 DTO 정보 추가 (파일을 찾지 못한 경우)
+     */
+    private void addEmptyDto(String className, String filePath) {
+        DtoInfo dto = DtoInfo.builder()
+            .className(className)
+            .fields(new ArrayList<>())
+            .existingAnnotations(new HashMap<>())
+            .filePath(filePath)
+            .build();
+        dtoClasses.add(dto);
     }
 
     /**
